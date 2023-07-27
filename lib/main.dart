@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:under/feature/api/data_base.dart';
 import 'package:under/feature/home/injector.dart';
 import 'package:under/routers.dart';
 
@@ -8,7 +7,6 @@ GetIt getIt = GetIt.instance;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DataBase.initDatabase();
   runApp(const RootWidget());
 }
 

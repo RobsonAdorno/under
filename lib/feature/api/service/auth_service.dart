@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:under/feature/api/token.dart';
 import 'package:under/feature/atoms/sign_in_atom.dart';
 import 'package:under/feature/atoms/sign_up_atom.dart';
 import 'package:under/feature/entities/entities.dart';
@@ -32,6 +34,7 @@ class AuthService {
   }
 
   Future<void> register(UserModel userModel) async {
+    final token = await Token.getToken();
     signupState.value = SignUpLoadingState();
 
     Result result = await _authenticationRepository.register(userModel);
@@ -42,6 +45,7 @@ class AuthService {
     }
 
     if (result is Sucess) {
+      userModel.token = token;
       signupState.value = SignUpSucessState(userModel: userModel);
     }
   }

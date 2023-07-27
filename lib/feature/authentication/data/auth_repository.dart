@@ -12,16 +12,12 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<Result<dynamic, Exception>> login(SignInEntity sign) async {
     try {
-      Response response = await Http(uri: authString, body: {
-        'username': sign.username,
+      Response response = await Http(uri: authString, token: sign.token, body: {
+        'email': sign.email,
         'password': sign.password,
       }).post();
 
       if (response.statusCode == 200) {
-        return Sucess(response.body);
-      }
-
-      if (response.statusCode == 202) {
         return Sucess(response.body);
       }
 

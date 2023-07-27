@@ -34,7 +34,7 @@ class Injector {
 
   static initSignInModule() {
     getIt.registerSingleton<IAuthRepository>(AuthRepository());
-    getIt.registerSingleton(
+    getIt.registerSingleton<SignInBloc>(
         SignInBloc(authRepository: getIt.get<IAuthRepository>()));
     getIt.registerSingleton(SignInPage(signInBloc: getIt.get<SignInBloc>()));
   }

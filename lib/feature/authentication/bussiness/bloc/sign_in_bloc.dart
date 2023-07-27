@@ -24,7 +24,7 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     }
 
     if (result is Failure) {
-      emitter(ErrorSignInState);
+      emitter(ErrorSignInState(errorMessage: result.exception.toString()));
     }
   }
 }

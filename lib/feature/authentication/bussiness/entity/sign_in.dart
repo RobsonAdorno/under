@@ -1,9 +1,11 @@
 class SignInEntity {
-  String username;
+  String email;
   String password;
+  String token;
 
   SignInEntity({
-    required this.username,
+    required this.email,
     required this.password,
+    required this.token,
   });
 }

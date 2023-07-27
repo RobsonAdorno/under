@@ -1,4 +1,5 @@
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:under/feature/api/api.dart';
 import 'package:under/feature/entities/entities.dart';
 
@@ -42,6 +43,7 @@ class AuthenticationRepository {
   }
 
   Future<Result<String, Exception>> register(UserModel userModel) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       Response response = await Http(uri: registerUrl, body: {
         'user': {
@@ -54,6 +56,7 @@ class AuthenticationRepository {
       }).post();
 
       if (response.statusCode == 200) {
+        prefs.setString('token', response.body);
         return Sucess(response.body);
       }
 

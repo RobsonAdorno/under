@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:under/feature/authentication/bussiness/bloc/sign_in_bloc.dart';
+import 'package:under/feature/authentication/presentation/page/signin_page.dart';
 import 'package:under/routers.dart';
 
 import '../pages/page.dart';
-import 'widget/custom_button.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -24,7 +25,12 @@ class HomePage extends StatelessWidget {
               width: 250,
               height: 30,
               child: CustomButton(onPressed: () {
-                Navigator.pushReplacementNamed(context, Routers.signIn);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute<void>(
+                      builder: (BuildContext context) =>
+                          SignInPage(signInBloc: getIt.get<SignInBloc>())),
+                );
               }, const Text('Login')),
             ),
             const SizedBox(

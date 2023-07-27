@@ -8,11 +8,13 @@ class Http {
   final _client = http.Client();
   String uri;
   String fullUrl = '';
+  String? token;
   Map<dynamic, dynamic>? body;
 
   Http({
     required this.uri,
     this.body,
+    this.token,
   }) {
     fullUrl = StringsApi.baseUrl + uri;
   }
@@ -22,7 +24,7 @@ class Http {
 
     return await _client.get(
       url,
-      headers: _getHeader(),
+      headers: getHeaderWithToken(),
     );
   }
 
@@ -33,7 +35,7 @@ class Http {
     return await _client.post(
       url,
       body: bodyEnconded,
-      headers: _getHeader(),
+      headers: getHeaderWithToken(),
     );
   }
 
@@ -42,5 +44,17 @@ class Http {
       'accept': 'application/json',
       'Content-Type': 'application/json',
     };
+  }
+
+  Map<String, String> getHeaderWithToken() {
+    if (token != null) {
+      return {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authentication': 'Bearer $token'
+      };
+    }
+
+    return _getHeader();
   }
 }

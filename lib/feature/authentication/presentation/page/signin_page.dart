@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:under/feature/api/token.dart';
 import 'package:under/feature/authentication/bussiness/bloc/sign_in_bloc.dart';
+import 'package:under/feature/home/injector.dart';
 
 import '../../../../routers.dart';
 import '../../../pages/authentication/signin.dart';
@@ -8,6 +10,7 @@ import '../../../pages/email_validator.dart';
 import '../../../pages/widget/custom_button.dart';
 import '../../../pages/widget/custom_text_form_field.dart';
 import '../../bussiness/entity/sign_in.dart';
+import '../../bussiness/event/signin_event.dart';
 import '../../bussiness/state/signin_state.dart';
 
 class SignInPage extends StatelessWidget {
@@ -19,37 +22,58 @@ class SignInPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Login'),
-        ),
-        body: BlocBuilder<SignInBloc, SignInState>(
-          builder: (context, state) {
-            return switch (state) {
-              InitSignInState _ => Body(),
-              LoadingSignInState _ => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              SucessSignInState _ => Container(),
-              ErrorSignInState errorState =>
-                ErrorCustom(errorState.errorMessage),
-            };
-          },
-        ));
+    return BlocProvider(
+        create: (context) => Injector.getIt.get<SignInBloc>(),
+        child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Login'),
+            ),
+            body: BlocBuilder<SignInBloc, SignInState>(
+              builder: (BuildContext context, SignInState state) {
+                return switch (state) {
+                  InitSignInState initState => Body(initState),
+                  LoadingSignInState _ => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  SucessSignInState _ => Container(),
+                  ErrorSignInState erroState => Body(erroState)
+                };
+              },
+            )));
   }
 }
 
-class Body extends StatelessWidget {
-  Body({Key? key}) : super(key: key);
+class Body extends StatefulWidget {
+  const Body(this.state, {Key? key}) : super(key: key);
 
+  final SignInState state;
+
+  @override
+  State<Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
   final TextEditingController textEditingControllerUsername =
       TextEditingController();
+
   final TextEditingController textEditingControllerPassword =
       TextEditingController();
 
   final signInFormAction = ValueNotifier<bool>(false);
 
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (widget.state is ErrorSignInState) {
+        final errorState = widget.state as ErrorSignInState;
+        _showCustomDialog(context, errorState.errorMessage);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +136,19 @@ class Body extends StatelessWidget {
               builder: (BuildContext context, bool isValid, Widget? child) {
                 return CustomButton(
                   const Text('Entrar'),
-                  onPressed: isValid ? _onClickButton() : null,
+                  onPressed: isValid
+                      ? () async {
+                          String? token = await Token.getToken();
+                          final bloc = Injector.getIt.get<SignInBloc>();
+
+                          final signinDTO = SignInEntity(
+                              email: textEditingControllerUsername.text,
+                              password: textEditingControllerPassword.text,
+                              token: token!);
+
+                          bloc.add(FetchLoginEvent(signInEntity: signinDTO));
+                        }
+                      : null,
                 );
               },
             ),
@@ -131,18 +167,29 @@ class Body extends StatelessWidget {
     );
   }
 
-  void Function()? _onClickButton() {
-    return () {
-      final signinDTO = SignInEntity(
-        username: textEditingControllerUsername.text,
-        password: textEditingControllerPassword.text,
-      );
-    };
-  }
-
   Widget teste(BuildContext context) {
     Navigator.pushReplacementNamed(context, Routers.homeLogged);
     return Container();
+  }
+
+  void _showCustomDialog(BuildContext context, String errorDescription) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Erro'),
+          content: Text(errorDescription),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
